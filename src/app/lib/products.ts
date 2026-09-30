@@ -40,11 +40,26 @@ export type ProductList = z.infer<typeof ProductListSchema>;
 
 const API_BASE = "https://dummyjson.com";
 export const SORT_FIELDS = ["title", "price", "stock"] as const;
-export type SearchQuery = {
-    q: string;
-    limit: number;
-    sortBy: (typeof SORT_FIELDS)[number];
-};
+// export type SearchQuery = {
+//     q: string;
+//     limit: number;
+//     sortBy: (typeof SORT_FIELDS)[number];
+// };
+
+
+export const SearchQuerySchema = z.object({
+    q: z.string().trim(),
+    limit: z
+        .number({ error: "กรุณากรอกจำนวนรายการ" })
+        .int("จำนวนรายการต้องเป็นจำนวนเต็ม")
+        .min(1, "อย่างน้อย 1 รายการ")
+        .max(30, "ไม่เกิน 30 รายการ"),
+    sortBy: z.enum(SORT_FIELDS),
+});
+
+
+export type SearchQuery = z.infer<typeof SearchQuerySchema>;
+
 
 export const defaultQuery: SearchQuery = {
     q: "",
@@ -92,4 +107,8 @@ export async function fetchProducts(
     return result.data;
 }
 
+// เติม: เมธอดของ Zod ที่สร้าง Schema ใหม่โดยนำฟิลด์ที่ระบุออก
+export const ProductDraftSchema = ProductSchema.omit({ id: true });
+
+export type ProductDraft = z.infer<typeof ProductDraftSchema>;
 
